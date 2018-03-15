@@ -6,6 +6,11 @@ import java.net.Socket;
 
 public class MyServer  {
     Socket s;
+    ServerSocket ss = new ServerSocket(8080);
+
+    public MyServer() throws IOException {
+    }
+
     public static void main(String[] args) throws Exception {
         MyServer server = new MyServer();
 //        Thread thread = new Thread(new Listen());
@@ -17,21 +22,27 @@ public class MyServer  {
     }
 
     private void startListen() throws Exception {
-        ServerSocket ss = new ServerSocket(8080);
         s = ss.accept();
         InputStream is = s.getInputStream();
         StringBuilder sb = new StringBuilder();
         String end;
         int symb = 0;
-        while ((symb = is.read()) != -1) {
+        while (symb !=  -1) {
+
+            if ( !is.equals(null)) {
+                symb = is.read();
+            }
             System.out.print((char) symb);
             sb.append((char) symb);
             if (sb.length() > 4) {
                 end = sb.substring(sb.length() - 4, sb.length());
                 if (end.equals("\r\n\r\n")) {
                     startWrite(s);
-                    s.close();
-                    s = ss.accept();
+                    if (s.isClosed()) {
+                        System.out.println("closed");
+                        startListen();
+                        //System.exit(1);
+                    }
                 }
 
             }
